@@ -1,0 +1,3 @@
+type MetaDataType = {
+  title: string
+}

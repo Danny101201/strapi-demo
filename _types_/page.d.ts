@@ -1,0 +1,3 @@
+interface PageProps {
+  user: string,
+}
