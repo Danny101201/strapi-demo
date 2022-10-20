@@ -1,6 +1,5 @@
 
 interface FilmPageProps {
-  user: string,
   films: FilmsType
 }
 

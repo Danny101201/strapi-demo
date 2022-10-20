@@ -1,6 +1,7 @@
 import type { GetServerSideProps, NextPage } from 'next';
 import type { NextPageWithLayout } from './_app'
 import Layout from 'components/Layout.component';
+import { useFetchUser } from 'api/authContext';
 
 const Home: NextPageWithLayout<{ user: string }> = ({ user }) => {
   return (
@@ -10,25 +11,15 @@ const Home: NextPageWithLayout<{ user: string }> = ({ user }) => {
   )
 }
 Home.getLayout = (page) => {
-  const { user } = page.props
+  const { user, loading } = useFetchUser();
   return (
-    <Layout user={user}>
+    <Layout user={user} loading={loading} title={'home'}>
       {page}
     </Layout>
   )
 }
-Home.metaData = {
-  title: 'Home'
-}
+
 
 export default Home
 
-export const getServerSideProps: GetServerSideProps<PageProps> = async () => {
 
-  return {
-    props: {
-      user: 'Danny'
-    }
-  }
-
-}

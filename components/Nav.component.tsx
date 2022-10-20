@@ -1,9 +1,44 @@
-
-
+import { fetcher } from 'api';
+import { useUser } from 'api/authContext';
 import Link from 'next/link';
-import React from 'react';
+import React, { ChangeEvent, useState } from 'react';
+import { setToken, unsetToken } from 'utils/auth';
 const Nav = () => {
-
+  const [data, setData] = useState({
+    identifier: '',
+    password: '',
+  });
+  const { user, loading } = useUser();
+  const handleSubmit = async (e: ChangeEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const responseData = await fetch(
+      `${process.env.NEXT_PUBLIC_STRAPI_URL}/auth/local`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          identifier: data.identifier,
+          password: data.password,
+        }),
+      }
+    ).then(res => res.json());
+    if (responseData.jwt) {
+      setToken(responseData);
+    } else {
+      console.log(responseData.error)
+    }
+  };
+  const logout = () => {
+    unsetToken();
+  };
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setData(preState => ({
+      ...preState,
+      [e.target.name]: e.target.value
+    }))
+  }
   return (
     <nav
       className="
@@ -72,7 +107,72 @@ const Nav = () => {
               </a>
             </Link>
           </li>
+          {!loading &&
+            (user ? (
+              <li>
+                <Link href="/profile">
+                  <a className="md:p-2 py-2 block hover:text-purple-400">
+                    Profile
+                  </a>
+                </Link>
+              </li>
+            ) : (
+              ''
+            ))}
+          {!loading &&
+            (user ? (
+              <li>
+                <a
+                  className="md:p-2 py-2 block hover:text-purple-400"
+                  onClick={logout}
+                  style={{ cursor: 'pointer' }}
+                >
+                  Logout
+                </a>
+              </li>
+            ) : (
+              ''
+            ))}
+          {!loading && !user ? (
+            <>
+              <li>
+                <form onSubmit={handleSubmit} className="form-inline">
+                  <input
+                    type="text"
+                    name="identifier"
+                    onChange={handleChange}
+                    placeholder="Username"
+                    className="md:p-2 form-input py-2 rounded mx-2"
+                    required
+                  />
+                  <input
+                    type="password"
+                    name="password"
+                    onChange={handleChange}
+                    placeholder="Password"
+                    className="md:p-2 form-input py-2 rounded mx-2"
+                    required
+                  />
 
+                  <button
+                    className="md:p-2 rounded py-2 text-black bg-purple-200 p-2"
+                    type="submit"
+                  >
+                    Login
+                  </button>
+                </form>
+              </li>
+              <li>
+                <Link href="/register">
+                  <a className="md:p-2 block py-2 hover:text-purple-400 text-black">
+                    Register
+                  </a>
+                </Link>
+              </li>
+            </>
+          ) : (
+            ''
+          )}
         </ul>
       </div>
     </nav>

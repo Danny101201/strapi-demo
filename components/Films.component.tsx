@@ -12,7 +12,7 @@ function FilmsList({ films }: FilmsListProps) {
           films.data.map((film) => {
             return (
               <li key={film.id}>
-                <Link href={`film/` + film.attributes.slug}>
+                <Link href={`films/` + film.id}>
                   {film.attributes.title}
                 </Link>
               </li>
