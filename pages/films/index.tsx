@@ -8,7 +8,7 @@ import useSWR from 'swr';
 import { useFetchUser } from 'api/authContext';
 const Films: NextPageWithLayout<FilmPageProps> = ({ films }) => {
   const [pageIndex, setPageIndex] = useState<number>(1)
-  const { data } = useSWR<FilmsType>(`${process.env.NEXT_PUBLIC_STRAPI_URL}/films?pagination[page]=${pageIndex}&pagination[pageSize]=5`, fetcher, {
+  const { data } = useSWR<FilmsType | undefined>(`${process.env.NEXT_PUBLIC_STRAPI_URL}/films?pagination[page]=${pageIndex}&pagination[pageSize]=5`, fetcher, {
     fallbackData: films
   })
   return (
@@ -54,7 +54,7 @@ Films.getLayout = (page) => {
 }
 
 export const getServerSideProps: GetServerSideProps<FilmPageProps> = async (context) => {
-  const filmsResponse = await fetcher<FilmsType>(`${process.env.NEXT_PUBLIC_STRAPI_URL}/films?pagination[page]=1&pagination[pageSize]=5`)
+  const filmsResponse = await fetcher(`${process.env.NEXT_PUBLIC_STRAPI_URL}/films?pagination[page]=1&pagination[pageSize]=5`) as FilmsType
 
   if (filmsResponse.data === null) {
     return {

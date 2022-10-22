@@ -1,23 +1,25 @@
 import { fetcher } from 'api'
 import { GetServerSideProps, NextApiRequest } from 'next'
+import Router from 'next/router';
 import { NextPageWithLayout } from 'pages/_app'
 import { ParsedUrlQuery } from 'querystring'
 import Layout from 'components/Layout.component';
 import { useFetchUser } from 'api/authContext';
 import { getTokenFromLocalCookie, getUserFromLocalCookie, getTokenFromServerCookie } from 'utils/auth';
 import { ChangeEvent, FormEvent, useState } from 'react';
-import Router from 'next/router';
-
+import { markdownToHTML } from 'utils/markdownToHTML';
 interface FilmProps {
   film: FilmData,
   jwt: string,
-  slug: number
+  slug: number,
+  plot: string
 }
-const Film: NextPageWithLayout<FilmProps> = ({ film, jwt, slug }) => {
+const Film: NextPageWithLayout<FilmProps> = ({ film, jwt, slug, plot }) => {
   const { user, loading } = useFetchUser();
   const [review, setReview] = useState({
     value: ''
   })
+  console.log(film)
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setReview({
       value: e.target.value
@@ -66,6 +68,7 @@ const Film: NextPageWithLayout<FilmProps> = ({ film, jwt, slug }) => {
           Plot
         </span>
       </h2>
+      <div dangerouslySetInnerHTML={{ __html: plot }}></div>
       {user && (
         <>
           <h2 className="text-3xl md:text-4xl font-extrabold leading-tighter mb-4 mt-4">
@@ -118,7 +121,7 @@ Film.getLayout = (page) => {
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { slug } = context.params as ParsedUrlQuery
   const jwt = typeof window !== 'undefined' ? getTokenFromLocalCookie() : getTokenFromServerCookie(context.req as NextApiRequest)
-  const filmResponse = await fetcher<FilmsType>(`${process.env.NEXT_PUBLIC_STRAPI_URL}/films/${slug}?populate=*`,
+  const filmResponse = await fetcher(`${process.env.NEXT_PUBLIC_STRAPI_URL}/films/${slug}?populate=*`,
     jwt
       ? {
         headers: {
@@ -126,8 +129,8 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         },
       }
       : undefined
-  )
-
+  ) 
+  const plot = await markdownToHTML(filmResponse.data.attributes.plot)
   if (filmResponse.data === null) {
     return {
       notFound: true,
@@ -137,6 +140,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     props: {
       film: filmResponse.data,
       jwt: jwt || '',
+      plot,
       slug
     }
   }

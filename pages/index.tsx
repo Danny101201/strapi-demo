@@ -3,7 +3,7 @@ import type { NextPageWithLayout } from './_app'
 import Layout from 'components/Layout.component';
 import { useFetchUser } from 'api/authContext';
 
-const Home: NextPageWithLayout<{ user: string }> = ({ user }) => {
+const Home: NextPageWithLayout = () => {
   return (
     <h1 className="text-3xl font-bold underline">
       Hello world!
