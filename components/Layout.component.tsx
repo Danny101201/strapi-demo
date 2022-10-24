@@ -7,7 +7,7 @@ interface LayoutProp {
   children: React.ReactElement
   title: string
   loading?: boolean
-  user: any
+  user?: any
 }
 function Layout({ user, loading = false, children, title }: LayoutProp) {
   return (
